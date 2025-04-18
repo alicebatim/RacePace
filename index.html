@@ -1,0 +1,66 @@
+<!DOCTYPE html><html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Running Time Equivalent Calculator</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; max-width: 500px; margin: auto; }
+        input, select, button { padding: 10px; margin: 5px 0; width: 100%; }
+        .result { margin-top: 20px; font-weight: bold; }
+    </style>
+</head>
+<body><h2>Running Time Equivalent Calculator</h2><label for="inputTime">Enter your time (HH:MM:SS):</label> <input type="text" id="inputTime" placeholder="e.g. 00:45:00">
+
+<label for="inputDistance">Enter your distance:</label> <input type="number" id="inputDistance" step="0.01" placeholder="e.g. 10"> <select id="inputUnit"> <option value="km">Kilometers</option> <option value="miles">Miles</option> <option value="meters">Meters</option> </select>
+
+<label for="targetDistance">Target distance:</label> <input type="number" id="targetDistance" step="0.01" placeholder="e.g. 5"> <select id="targetUnit"> <option value="km">Kilometers</option> <option value="miles">Miles</option> <option value="meters">Meters</option> </select>
+
+<button onclick="calculateEquivalentTime()">Calculate Equivalent Time</button>
+
+<div class="result" id="result"></div><script>
+function timeToSeconds(timeStr) {
+    const parts = timeStr.split(":").map(Number);
+    return parts[0] * 3600 + parts[1] * 60 + parts[2];
+}
+
+function secondsToTime(seconds) {
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = Math.round(seconds % 60);
+    return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+}
+
+function convertToKm(value, unit) {
+    if (unit === "miles") return value * 1.60934;
+    if (unit === "meters") return value / 1000;
+    return value; // km
+}
+
+function calculateEquivalentTime() {
+    const timeInput = document.getElementById("inputTime").value;
+    const distance = parseFloat(document.getElementById("inputDistance").value);
+    const distanceUnit = document.getElementById("inputUnit").value;
+    const targetDistance = parseFloat(document.getElementById("targetDistance").value);
+    const targetUnit = document.getElementById("targetUnit").value;
+
+    if (!timeInput || isNaN(distance) || isNaN(targetDistance) || distance <= 0) {
+        document.getElementById("result").innerText = "Please enter valid values for all fields.";
+        return;
+    }
+
+    const totalSeconds = timeToSeconds(timeInput);
+    const distanceKm = convertToKm(distance, distanceUnit);
+    const targetDistanceKm = convertToKm(targetDistance, targetUnit);
+
+    const pacePerKm = totalSeconds / distanceKm;
+    const targetTimeSecondsPace = pacePerKm * targetDistanceKm;
+
+    const targetTimeSecondsRiegel = totalSeconds * Math.pow(targetDistanceKm / distanceKm, 1.06);
+
+    document.getElementById("result").innerHTML = `
+        <p>Simple pace equivalent time for ${targetDistance} ${targetUnit}: <strong>${secondsToTime(targetTimeSecondsPace)}</strong></p>
+        <p>Riegel formula predicted time for ${targetDistance} ${targetUnit}: <strong>${secondsToTime(targetTimeSecondsRiegel)}</strong></p>
+    `;
+}
+</script></body>
+</html>
